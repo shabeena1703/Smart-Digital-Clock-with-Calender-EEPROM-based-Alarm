@@ -47,10 +47,10 @@ Allows the user to edit:
 
     Hour → Minute → Second → Date → Month → Year
 
-- **SW1** → Increment selected field
-- **SW2** → Decrement selected field
-- **SW3** → Select next field
-- **SW4** → Change operating mode
+- SW1 → Increment selected field
+- SW2 → Decrement selected field
+- SW3 → Select next field
+- SW4 → Change operating mode
 
 **Mode 2 — Alarm Edit**
 
@@ -58,11 +58,11 @@ Allows the user to set a date-specific alarm:
 
     Hour → Minute → Second → Date → Month → Year
 
-- **SW1** → Increment selected field
-- **SW2** → Decrement selected field
-- **SW3** → Select next field
-- **SW4** → Change operating mode
-- **SW5** → Save alarm settings
+- SW1 → Increment selected field
+- SW2 → Decrement selected field
+- SW3 → Select next field
+- SW4 → Change operating mode
+- SW5 → Save alarm settings
 
 The alarm is triggered only when **hour, minute, second, date, month, and year** all match the current date and time.
 
@@ -153,41 +153,41 @@ The validity marker is used to identify whether valid alarm data is stored in EE
           ┌──────────────┐
           │  MAIN LOOP   │◄─────────────────────────────────┐
           └──────┬───────┘                                  │
-                 │                                           │
-                 ▼                                           │
-    ┌──────────────────────────────┐                         │
-    │ Read Keypad Input            │                         │
-    └────────────┬─────────────────┘                         │
-                 │                                           │
-                 ▼                                           │
-    ┌──────────────────────────────┐                         │
-    │ Check Operating Mode         │                         │
-    └────────────┬─────────────────┘                         │
-                 │                                           │
-       ┌─────────┼──────────┐                                │
-       │         │          │                                │
-       ▼         ▼          ▼                                │
+                 │                                          │
+                 ▼                                          │
+    ┌──────────────────────────────┐                        │
+    │ Read Keypad Input            │                        │
+    └────────────┬─────────────────┘                        │
+                 │                                          │
+                 ▼                                          │
+    ┌──────────────────────────────┐                        │
+    │ Check Operating Mode         │                        │
+    └────────────┬─────────────────┘                        │
+                 │                                          │
+       ┌─────────┼──────────┐                               │
+       │         │          │                               │
+       ▼         ▼          ▼                               │
     ┌───────┐ ┌───────┐ ┌───────┐                           │
     │Mode 0 │ │Mode 1 │ │Mode 2 │                           │
     │Normal │ │RTC    │ │Alarm  │                           │
     │Clock  │ │Edit   │ │Edit   │                           │
     └───┬───┘ └───┬───┘ └───┬───┘                           │
-        │         │          │                               │
-        ▼         ▼          ▼                               │
-    Display    SW1 → +    SW1 → +                            │
-    Time &     SW2 → -    SW2 → -                            │
-    Date       SW3 → Next SW3 → Next                         │
-               Field      Field                              │
-                          SW5 → Save                          │
-                              │                               │
-        └─────────┬──────────┴──────────────┐                │
-                  │                         │                │
-                  ▼                         ▼                │
-          ┌──────────────────────────────────────┐           │
-          │ Check Current Date & Time Against    │           │
-          │ Saved Alarm                          │           │
-          └──────────────────┬───────────────────┘           │
-                             │                               │
+        │         │          │                              │
+        ▼         ▼          ▼                              │
+    Display    SW1 → +    SW1 → +                           │
+    Time &     SW2 → -    SW2 → -                           │
+    Date       SW3 → Next SW3 → Next                        │
+               Field      Field                             │
+                          SW5 → Save                        │
+                              │                             │
+        └─────────┬──────────┴──────────────┐               │
+                  │                         │               │
+                  ▼                         ▼               │
+          ┌──────────────────────────────────────┐          │
+          │ Check Current Date & Time Against    │          │
+          │ Saved Alarm                          │          │
+          └──────────────────┬───────────────────┘          │
+                             │                              │
                              ▼                               │
                     ┌─────────────────┐                      │
                     │   Alarm Match?  │                      │
@@ -195,28 +195,28 @@ The validity marker is used to identify whether valid alarm data is stored in EE
                             │                                │
                        ┌────┴────┐                           │
                       NO        YES                          │
-                       │          │                           │
-                       │          ▼                           │
-                       │   ┌───────────────┐                  │
-                       │   │ Turn ON       │                  │
-                       │   │ Buzzer        │                  │
-                       │   └───────┬───────┘                  │
-                       │           │                          │
-                       │           ▼                          │
-                       │   ┌────────────────┐                 │
-                       │   │  SW6 Pressed?  │                 │
-                       │   └───────┬────────┘                 │
-                       │           │                          │
-                       │      ┌────┴────┐                     │
-                       │     NO        YES                    │
-                       │      │          │                     │
-                       │      │          ▼                     │
-                       │      │   ┌──────────────┐             │
-                       │      │   │ Turn OFF     │             │
-                       │      │   │ Buzzer       │             │
-                       │      │   └──────┬───────┘             │
-                       │      │          │                     │
-                       └──────┴──────────┴─────────────────────┘
+                       │          │                          │
+                       │          ▼                          │
+                       │   ┌───────────────┐                 │
+                       │   │ Turn ON       │                 │
+                       │   │ Buzzer        │                 │
+                       │   └───────┬───────┘                 │
+                       │           │                         │
+                       │           ▼                         │
+                       │   ┌────────────────┐                │
+                       │   │  SW6 Pressed?  │                │
+                       │   └───────┬────────┘                │
+                       │           │                         │
+                       │      ┌────┴────┐                    │
+                       │     NO        YES                   │
+                       │      │          │                   │
+                       │      │          ▼                   │
+                       │      │   ┌──────────────┐           │
+                       │      │   │ Turn OFF     │           │
+                       │      │   │ Buzzer       │           │
+                       │      │   └──────┬───────┘           │
+                       │      │          │                   │
+                       └──────┴──────────┴───────────────────┘
                                       │
                                       ▼
                                  MAIN LOOP
