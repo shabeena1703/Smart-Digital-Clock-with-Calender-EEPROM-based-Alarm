@@ -34,7 +34,7 @@ A **PIC18F4580-based digital clock** that displays time and date on a 16x2 LCD. 
 
 ## 🎛️ Operating Modes
 
-**Mode 0 — Normal Clock(Run Mode)**
+**Mode 0 — Normal Clock (Run Mode)**
 
 Displays the current time and date.
 
@@ -73,7 +73,7 @@ The alarm is triggered only when **hour, minute, second, date, month, and year**
 1. Set the alarm date and time using the keypad.
 2. Press **SW5** to save the alarm settings.
 3. The alarm data is stored in the internal EEPROM.
-4. The system continuously checks the current date and time.
+4. In normal run mode, the system continuously checks the current date and time.
 5. When all alarm values match the current date and time, the buzzer is activated.
 6. Press **SW6** to turn OFF the active buzzer.
 
@@ -129,6 +129,50 @@ The validity marker is used to identify whether valid alarm data is stored in EE
     ├── isr.c
     └── README.md
 
+### File Description
+
+| File | Description |
+|------|-------------|
+| **main.c** | Contains the main application logic. Handles operating modes, keypad input, RTC/alarm editing, LCD display, alarm saving, and buzzer control. |
+| **alarm.c** | Handles alarm initialization, saving/loading alarm settings, alarm checking, buzzer activation, and calculation of days in a month. |
+| **alarm.h** | Contains alarm variable declarations and alarm function prototypes. |
+| **rtc.c** | Implements the software RTC. Maintains and updates hours, minutes, seconds, date, month, and year. |
+| **rtc.h** | Contains RTC variable declarations and function prototypes. |
+| **timer.c** | Configures Timer0 and enables the Timer0 interrupt used for timekeeping. |
+| **timer.h** | Contains the Timer0 initialization function declaration. |
+| **isr.c** | Contains the Timer0 Interrupt Service Routine (ISR). It maintains the timing count and updates the RTC. |
+| **clcd.c** | Contains functions for LCD initialization, command/data writing, character/string display, and busy-status checking. |
+| **clcd.h** | Contains LCD pin definitions, macros, and function declarations. |
+| **matrix_keypad.c** | Scans the 3x4 matrix keypad and detects the pressed switch using edge-triggered input. |
+| **matrix_keypad.h** | Contains keypad pin definitions, switch mappings, macros, and function declarations. |
+| **eeprom.c** | Implements internal EEPROM read and write operations used to store alarm settings. |
+| **eeprom.h** | Contains EEPROM read/write function declarations. |
+
+### File Interaction
+
+    main.c
+       │
+       ├──► rtc.c
+       │      └── Maintains time and date
+       │
+       ├──► alarm.c
+       │      └── Handles alarm settings and checking
+       │
+       ├──► clcd.c
+       │      └── Displays information on LCD
+       │
+       ├──► matrix_keypad.c
+       │      └── Reads keypad input
+       │
+       └──► eeprom.c
+              └── Stores and retrieves alarm settings
+
+    timer.c + isr.c
+          │
+          └──► Generate Timer0 interrupts
+                    │
+                    └──► Update RTC
+
 ---
 
 ## 📊 Flowchart
@@ -151,75 +195,73 @@ The validity marker is used to identify whether valid alarm data is stored in EE
                  │
                  ▼
           ┌──────────────┐
-          │  MAIN LOOP   │◄─────────────────────────────────┐
-          └──────┬───────┘                                  │
-                 │                                          │
-                 ▼                                          │
-    ┌──────────────────────────────┐                        │
-    │ Read Keypad Input            │                        │
-    └────────────┬─────────────────┘                        │
-                 │                                          │
-                 ▼                                          │
-    ┌──────────────────────────────┐                        │
-    │ Check Operating Mode         │                        │
-    └────────────┬─────────────────┘                        │
-                 │                                          │
-       ┌─────────┼──────────┐                               │
-       │         │          │                               │
-       ▼         ▼          ▼                               │
-    ┌───────┐ ┌───────┐ ┌───────┐                           │
-    │Mode 0 │ │Mode 1 │ │Mode 2 │                           │
-    │Normal │ │RTC    │ │Alarm  │                           │
-    │Clock  │ │Edit   │ │Edit   │                           │
-    └───┬───┘ └───┬───┘ └───┬───┘                           │
-        │         │          │                              │
-        ▼         ▼          ▼                              │
-    Display    SW1 → +    SW1 → +                           │
-    Time &     SW2 → -    SW2 → -                           │
-    Date       SW3 → Next SW3 → Next                        │
-               Field      Field                             │
-                          SW5 → Save                        │
-                              │                             │
-        └─────────┬──────────┴──────────────┐               │
-                  │                         │               │
-                  ▼                         ▼               │
-          ┌──────────────────────────────────────┐          │
-          │ Check Current Date & Time Against    │          │
-          │ Saved Alarm                          │          │
-          └──────────────────┬───────────────────┘          │
-                             │                              │
-                             ▼                               │
-                    ┌─────────────────┐                      │
-                    │   Alarm Match?  │                      │
-                    └───────┬─────────┘                      │
-                            │                                │
-                       ┌────┴────┐                           │
-                      NO        YES                          │
-                       │          │                          │
-                       │          ▼                          │
-                       │   ┌───────────────┐                 │
-                       │   │ Turn ON       │                 │
-                       │   │ Buzzer        │                 │
-                       │   └───────┬───────┘                 │
-                       │           │                         │
-                       │           ▼                         │
-                       │   ┌────────────────┐                │
-                       │   │  SW6 Pressed?  │                │
-                       │   └───────┬────────┘                │
-                       │           │                         │
-                       │      ┌────┴────┐                    │
-                       │     NO        YES                   │
-                       │      │          │                   │
-                       │      │          ▼                   │
-                       │      │   ┌──────────────┐           │
-                       │      │   │ Turn OFF     │           │
-                       │      │   │ Buzzer       │           │
-                       │      │   └──────┬───────┘           │
-                       │      │          │                   │
-                       └──────┴──────────┴───────────────────┘
-                                      │
-                                      ▼
-                                 MAIN LOOP
+          │  MAIN LOOP   │◄──────────────────────┐
+          └──────┬───────┘                       │
+                 │                               │
+                 ▼                               │
+    ┌──────────────────────────────┐             │
+    │ Read Keypad Input            │             │
+    └────────────┬─────────────────┘             │
+                 │                               │
+                 ▼                               │
+    ┌──────────────────────────────┐             │
+    │ Check Operating Mode         │             │
+    └────────────┬─────────────────┘             │
+                 │                               │
+        ┌────────┼─────────┐                     │
+        │        │         │                     │
+        ▼        ▼         ▼                     │
+    ┌───────┐ ┌───────┐ ┌───────┐                │
+    │Mode 0 │ │Mode 1 │ │Mode 2 │                │
+    │Normal │ │RTC    │ │Alarm  │                │
+    │Clock  │ │Edit   │ │Edit   │                │
+    └───┬───┘ └───┬───┘ └───┬───┘                │
+        │         │          │                   │
+        │         ▼          ▼                   │
+        │     Edit RTC    Edit Alarm             │
+        │     SW1 → +     SW1 → +                │
+        │     SW2 → -     SW2 → -                │
+        │     SW3 → Next  SW3 → Next             │
+        │                 SW5 → Save             │
+        │                     │                  │
+        ▼                     ▼                  │
+    ┌──────────────────────────────┐             │
+    │ Check Alarm                  │             │
+    │ in Normal Run Mode           │             │
+    └────────────┬─────────────────┘             │
+                 │                               │
+                 ▼                               │
+          ┌──────────────┐                       │
+          │ Alarm Match? │                       │
+          └──────┬───────┘                       │
+                 │                               │
+            ┌────┴────┐                          │
+           NO        YES                         │
+            │          │                         │
+            │          ▼                         │
+            │   ┌──────────────┐                 │
+            │   │ Turn ON      │                 │
+            │   │ Buzzer       │                 │
+            │   └──────┬───────┘                 │
+            │          │                         │
+            │          ▼                         │
+            │   ┌──────────────┐                 │
+            │   │ SW6 Pressed? │                 │
+            │   └──────┬───────┘                 │
+            │          │                         │
+            │     ┌────┴────┐                    │
+            │    NO        YES                   │
+            │     │          │                   │
+            │     │          ▼                   │
+            │     │   ┌──────────────┐            │
+            │     │   │ Turn OFF     │            │
+            │     │   │ Buzzer       │            │
+            │     │   └──────┬───────┘            │
+            │     │          │                    │
+            └─────┴──────────┴────────────────────┘
+                           │
+                           ▼
+                      MAIN LOOP
 
 ---
 
@@ -244,7 +286,7 @@ The validity marker is used to identify whether valid alarm data is stored in EE
 4. Add all `.c` and `.h` files to the project.
 5. Build the project.
 6. Program the generated HEX file into the PIC18F4580.
-7. Connect the LCD, matrix keypad and buzzer according to the configured pins.
+7. Connect the LCD, matrix keypad, and buzzer according to the configured pins.
 8. Power ON the system.
 9. The clock and calendar will be displayed on the LCD.
 
@@ -252,7 +294,7 @@ The validity marker is used to identify whether valid alarm data is stored in EE
 
 ## 🖥️ Output
 
-**Normal Clock (Run Mode)**
+**Normal Clock — Run Mode**
 
     12:30:45
     01-10-2026
@@ -288,7 +330,7 @@ The buzzer is activated and can be turned OFF using **SW6**.
 - Timer0 interrupts
 - Interrupt Service Routine
 - 16x2 LCD interfacing
-- Matrix keypad interfacing
+- 3x4 matrix keypad interfacing
 - Internal EEPROM read/write
 - Date and time management
 - Leap year calculation
@@ -303,7 +345,7 @@ The buzzer is activated and can be turned OFF using **SW6**.
 - Managing multiple operating modes
 - Handling date and month transitions
 - Implementing leap year calculation
-- Storing the alarm year in EEPROM
+- Storing the 32-bit alarm year in EEPROM
 - Comparing both date and time for the alarm
 - Handling keypad input while editing different fields
 
@@ -319,14 +361,21 @@ The buzzer is activated and can be turned OFF using **SW6**.
 - Date and time management
 - Leap year calculation
 - Modular and mode-based programming
+- Breaking an embedded application into separate driver and application modules
 
 ---
 
 ## ✅ Result
 
-Successfully developed a **PIC18F4580-based Smart Digital Clock and Calendar** with RTC editing and a **date-specific EEPROM-based alarm system**.
+Successfully developed a **PIC18F4580-based Smart Digital Clock and Calendar** with:
 
-The system displays the current time and date, allows the user to configure an alarm through the matrix keypad, stores the alarm settings in internal EEPROM, and activates the buzzer when the configured date and time are reached.
+- Time and date display
+- RTC editing
+- Date-specific alarm setting
+- EEPROM-based alarm storage
+- Timer0-based timekeeping
+- LCD and keypad interfacing
+- Buzzer-based alarm indication
 
 ---
 
@@ -334,8 +383,6 @@ The system displays the current time and date, allows the user to configure an a
 
 **Sk Shabeena**
 
-📧 Email: [skshabeena33@gmail.com](mailto:skshabeena33@gmail.com)
-
-🔗 LinkedIn: [Shaik Shabeena](https://www.linkedin.com/in/shaik-shabeena-36a7b933/)
-
-💻 GitHub: [shabeena1703](https://github.com/shabeena1703)
+- 📧 Email: skshabeena33@gmail.com
+- 🔗 LinkedIn: https://www.linkedin.com/in/shaik-shabeena-36a7b933/
+- 💻 GitHub: https://github.com/shabeena1703
